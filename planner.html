@@ -1,0 +1,858 @@
+<title>Million Dollar Odds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#EDF0F5; --surface:#FFFFFF; --surface-2:#F5F7FA; --surface-3:#E4E9F1;
+    --ink:#141C27; --ink-2:#4B5A6E; --ink-3:#77869B;
+    --line:#D5DCE6; --line-strong:#BAC5D4;
+    --blue:#3A5FC0; --amber:#C2610C; --teal:#0E8C7B;
+    --bar:#9AA8BC; --bar-hi:#0E8C7B;
+    --warn-bg:#FBF0E2; --warn-ink:#8A4908; --warn-line:#E0B078;
+    --shadow:0 1px 2px rgba(20,28,39,.06), 0 8px 24px -12px rgba(20,28,39,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E141D; --surface:#141C27; --surface-2:#1A2431; --surface-3:#212D3D;
+      --ink:#E3E9F1; --ink-2:#9DAABC; --ink-3:#71808F;
+      --line:#293547; --line-strong:#3A4A60;
+      --blue:#5F7BD0; --amber:#C9781F; --teal:#1F9E88;
+      --bar:#46566C; --bar-hi:#1F9E88;
+      --warn-bg:#2A2013; --warn-ink:#E0A961; --warn-line:#5C4420;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E141D; --surface:#141C27; --surface-2:#1A2431; --surface-3:#212D3D;
+    --ink:#E3E9F1; --ink-2:#9DAABC; --ink-3:#71808F;
+    --line:#293547; --line-strong:#3A4A60;
+    --blue:#5F7BD0; --amber:#C9781F; --teal:#1F9E88;
+    --bar:#46566C; --bar-hi:#1F9E88;
+    --warn-bg:#2A2013; --warn-ink:#E0A961; --warn-line:#5C4420;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground); color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:15px; line-height:1.55;
+    padding-block:0; padding-left:20px; padding-right:20px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding-block:40px 64px}
+  .num{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+
+  /* ---------- masthead ---------- */
+  .masthead{border-bottom:2px solid var(--ink); padding-bottom:18px; margin-bottom:28px}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--ink-3); margin:0 0 10px
+  }
+  h1{
+    font-family:Spectral,Georgia,serif; font-weight:700; font-size:clamp(30px,5vw,46px);
+    line-height:1.05; letter-spacing:-.015em; margin:0 0 12px; text-wrap:balance
+  }
+  .standfirst{
+    font-family:Spectral,Georgia,serif; font-size:clamp(16px,2vw,18.5px); line-height:1.5;
+    color:var(--ink-2); max-width:62ch; margin:0
+  }
+  .standfirst em{color:var(--ink); font-style:italic}
+
+  /* ---------- verdict ---------- */
+  .verdict{
+    display:grid; grid-template-columns:minmax(200px,1fr) 2fr; gap:0;
+    background:var(--surface); border:1px solid var(--line); border-radius:3px;
+    box-shadow:var(--shadow); overflow:hidden; margin-bottom:14px
+  }
+  .verdict-main{padding:24px 26px; border-right:1px solid var(--line)}
+  .verdict-label{
+    font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--ink-3); margin:0 0 6px
+  }
+  #pgoal{
+    font-family:Spectral,Georgia,serif; font-weight:700; font-size:clamp(48px,8vw,68px);
+    line-height:.95; letter-spacing:-.03em; color:var(--teal); display:block;
+    font-variant-numeric:tabular-nums
+  }
+  .verdict-sub{font-size:13px; color:var(--ink-2); margin:8px 0 0}
+  .quantiles{
+    display:grid; grid-template-columns:repeat(4,1fr); align-content:stretch;
+    gap:1px; background:var(--line)
+  }
+  .q{background:var(--surface); padding:18px 16px}
+  .q dt{
+    font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3); margin:0 0 5px
+  }
+  .q dd{
+    margin:0; font-family:"IBM Plex Mono",monospace; font-weight:500;
+    font-size:clamp(15px,2.1vw,19px); font-variant-numeric:tabular-nums; letter-spacing:-.02em
+  }
+  .q small{display:block; font-family:"IBM Plex Sans",sans-serif; font-size:11px; color:var(--ink-3); font-weight:400; margin-top:3px; letter-spacing:0}
+
+  /* ---------- audit strip ---------- */
+  @media (max-width:760px){
+    .verdict{grid-template-columns:1fr}
+    .verdict-main{border-right:0; border-bottom:1px solid var(--line)}
+    .quantiles{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:620px){
+    .ax-text{font-size:15px}
+    .goal-text{font-size:16px}
+    .region-text{font-size:16px}
+    .lbl-win,.lbl-churn{font-size:16px}
+  }
+  .audit{
+    display:flex; gap:12px; align-items:flex-start;
+    border:1px solid var(--line); border-left:3px solid var(--ink-3);
+    background:var(--surface-2); border-radius:3px; padding:13px 16px;
+    font-size:13.5px; color:var(--ink-2); margin-bottom:30px
+  }
+  .audit.flag{background:var(--warn-bg); border-color:var(--warn-line); border-left-color:var(--amber); color:var(--warn-ink)}
+  .audit strong{color:var(--ink); font-weight:600}
+  .audit.flag strong{color:var(--warn-ink)}
+  .audit-icon{
+    font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:12px;
+    flex-shrink:0; padding-top:1px; letter-spacing:.08em
+  }
+
+  /* ---------- layout ---------- */
+  .cols{display:grid; grid-template-columns:300px 1fr; gap:26px; align-items:start}
+  .cols>*{min-width:0}
+  @media (max-width:900px){ .cols{grid-template-columns:1fr} }
+
+  .panel{
+    min-width:0;
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:3px; box-shadow:var(--shadow)
+  }
+  .panel-head{
+    padding:14px 18px; border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap
+  }
+  .panel-head h2{
+    font-family:Spectral,Georgia,serif; font-size:17px; font-weight:600;
+    margin:0; letter-spacing:-.01em
+  }
+  .panel-note{font-size:12px; color:var(--ink-3); margin:0}
+  .panel-body{padding:18px}
+
+  /* ---------- controls ---------- */
+  .presets{display:flex; gap:6px; padding:14px 18px 0; flex-wrap:wrap}
+  .presets button{
+    font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.04em;
+    padding:6px 10px; border-radius:2px; cursor:pointer;
+    border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink-2);
+    transition:background .12s, color .12s, border-color .12s
+  }
+  .presets button:hover{background:var(--surface-3); color:var(--ink)}
+  .presets button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--surface)}
+  .presets button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
+
+  .ctrl{padding:13px 0; border-bottom:1px dotted var(--line)}
+  .ctrl:last-child{border-bottom:0; padding-bottom:2px}
+  .ctrl-top{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:7px}
+  .ctrl label{font-size:13px; color:var(--ink-2); font-weight:500}
+  .ctrl output{
+    font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600;
+    font-variant-numeric:tabular-nums; color:var(--ink)
+  }
+  .ctrl .hint{font-size:11.5px; color:var(--ink-3); margin:6px 0 0; line-height:1.4}
+  input[type=range]{
+    width:100%; height:20px; margin:0; background:transparent;
+    -webkit-appearance:none; appearance:none; cursor:pointer; display:block
+  }
+  input[type=range]:focus-visible{outline:2px solid var(--blue); outline-offset:4px; border-radius:2px}
+  input[type=range]::-webkit-slider-runnable-track{height:3px; background:var(--line-strong); border-radius:2px}
+  input[type=range]::-moz-range-track{height:3px; background:var(--line-strong); border-radius:2px}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:15px; height:15px; border-radius:50%;
+    background:var(--ink); border:2px solid var(--surface); margin-top:-6px;
+    box-shadow:0 0 0 1px var(--line-strong)
+  }
+  input[type=range]::-moz-range-thumb{
+    width:15px; height:15px; border-radius:50%; background:var(--ink);
+    border:2px solid var(--surface); box-shadow:0 0 0 1px var(--line-strong)
+  }
+
+  /* ---------- charts ---------- */
+  .chart-wrap{position:relative}
+  svg{display:block; width:100%; height:auto; overflow:visible}
+  .ax-line{stroke:var(--line-strong); stroke-width:1; fill:none}
+  .grid-line{stroke:var(--line); stroke-width:1; fill:none}
+  .ax-text{fill:var(--ink-3); font-family:"IBM Plex Mono",monospace; font-size:10.5px}
+  .goal-line{stroke:var(--ink); stroke-width:1.5; stroke-dasharray:4 3; fill:none}
+  .goal-text{fill:var(--ink); font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600}
+  .bar{fill:var(--bar)}
+  .bar.hit{fill:var(--bar-hi)}
+  .bar:hover{opacity:.72}
+  .region-text{font-family:"IBM Plex Sans",sans-serif; font-size:12px; font-weight:600; fill:var(--teal)}
+  .ln-win{stroke:var(--blue); stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round}
+  .ln-churn{stroke:var(--amber); stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round}
+  .cross-line{stroke:var(--ink-3); stroke-width:1; stroke-dasharray:3 3; fill:none}
+  .dot-win{fill:var(--blue)} .dot-churn{fill:var(--amber)}
+  .lbl-win{fill:var(--blue); font-family:"IBM Plex Sans",sans-serif; font-size:11.5px; font-weight:600}
+  .lbl-churn{fill:var(--amber); font-family:"IBM Plex Sans",sans-serif; font-size:11.5px; font-weight:600}
+
+  .legend{display:flex; gap:18px; flex-wrap:wrap; margin:0 0 12px; padding:0; list-style:none}
+  .legend li{display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-2)}
+  .swatch{width:14px; height:3px; border-radius:2px; flex-shrink:0}
+  .swatch.win{background:var(--blue)} .swatch.churn{background:var(--amber)}
+  .swatch.box{width:11px; height:11px; border-radius:2px}
+  .swatch.hit{background:var(--bar-hi)} .swatch.miss{background:var(--bar)}
+
+  .tip{
+    position:absolute; pointer-events:none; opacity:0; transition:opacity .1s;
+    background:var(--ink); color:var(--ground); border-radius:3px;
+    padding:7px 10px; font-size:12px; line-height:1.45; white-space:nowrap;
+    font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+    transform:translate(-50%,-100%); z-index:5; box-shadow:var(--shadow)
+  }
+  .tip.on{opacity:1}
+
+  /* ---------- tables ---------- */
+  .scroll{overflow-x:auto; min-width:0}
+  table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:520px}
+  th,td{padding:9px 12px; text-align:right; border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left; padding-left:0}
+  th:last-child,td:last-child{padding-right:0}
+  thead th{
+    font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-3); font-weight:500;
+    border-bottom:1px solid var(--line-strong)
+  }
+  tbody td.n{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+  tbody tr:last-child td{border-bottom:0}
+  td.hilite{color:var(--teal); font-weight:600}
+
+  /* ---------- prose ---------- */
+  .stack{display:flex; flex-direction:column; gap:26px; min-width:0}
+  .prose{font-size:14.5px; color:var(--ink-2); max-width:68ch}
+  .prose p{margin:0 0 11px} .prose p:last-child{margin-bottom:0}
+  .prose strong{color:var(--ink); font-weight:600}
+  .colophon{
+    margin-top:34px; padding-top:18px; border-top:1px solid var(--line);
+    font-size:12.5px; color:var(--ink-3); max-width:70ch
+  }
+  .colophon p{margin:0 0 8px} .colophon p:last-child{margin-bottom:0}
+  .colophon code{
+    font-family:"IBM Plex Mono",monospace; font-size:11.5px;
+    background:var(--surface-2); padding:1px 5px; border-radius:2px; border:1px solid var(--line)
+  }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">A risk model, not a promise</p>
+    <h1>Million Dollar Odds</h1>
+    <p class="standfirst">
+      Under $5,000 of capital, twenty hours a week, sales ability, and a two-year deadline.
+      This runs a productized B2B service business <em>four thousand times</em> and counts how
+      often it clears a million dollars. Move any assumption and the odds move with it.
+    </p>
+  </header>
+
+  <section class="verdict" aria-label="Headline result">
+    <div class="verdict-main">
+      <p class="verdict-label">Probability of $1M</p>
+      <span id="pgoal" class="num">—</span>
+      <p class="verdict-sub" id="verdict-sub">across 4,000 simulated futures</p>
+    </div>
+    <dl class="quantiles">
+      <div class="q"><dt>Bad case</dt><dd class="num" id="q-p10">—</dd><small>10th percentile</small></div>
+      <div class="q"><dt>Typical</dt><dd class="num" id="q-p50">—</dd><small>median outcome</small></div>
+      <div class="q"><dt>Good case</dt><dd class="num" id="q-p90">—</dd><small>90th percentile</small></div>
+      <div class="q"><dt>Clients</dt><dd class="num" id="q-clients">—</dd><small>median at horizon</small></div>
+    </dl>
+  </section>
+
+  <div class="audit" id="audit">
+    <span class="audit-icon" id="audit-icon">CHECK</span>
+    <span id="audit-text">Calculating…</span>
+  </div>
+
+  <div class="cols">
+
+    <!-- ------------------------------- controls -->
+    <form class="panel" id="controls" autocomplete="off">
+      <div class="panel-head"><h2>Your assumptions</h2></div>
+      <div class="presets">
+        <button type="button" data-preset="baseline" aria-pressed="true">Baseline</button>
+        <button type="button" data-preset="recommended" aria-pressed="false">Recommended</button>
+        <button type="button" data-preset="long" aria-pressed="false">36 months</button>
+      </div>
+      <div class="panel-body" id="sliders"></div>
+    </form>
+
+    <div class="stack">
+
+      <!-- --------------------------- distribution -->
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Where four thousand futures land</h2>
+          <p class="panel-note">each bar is $100k of final outcome</p>
+        </div>
+        <div class="panel-body">
+          <ul class="legend">
+            <li><span class="swatch box hit"></span>reached $1M</li>
+            <li><span class="swatch box miss"></span>fell short</li>
+          </ul>
+          <div class="chart-wrap">
+            <svg id="hist" viewBox="0 0 720 300" role="img" aria-labelledby="hist-t"></svg>
+            <div class="tip" id="hist-tip"></div>
+          </div>
+          <p class="prose" style="margin-top:14px" id="hist-t">
+            The distribution is long-tailed to the right: a handful of futures go extremely well.
+            <strong>Pay attention to the left edge instead.</strong> That is where you actually live
+            if things go averagely, and it is the part of the picture optimism hides.
+          </p>
+        </div>
+      </section>
+
+      <!-- --------------------------- ceiling -->
+      <section class="panel">
+        <div class="panel-head">
+          <h2>The ceiling</h2>
+          <p class="panel-note">servicing clients eats the hours you sell with</p>
+        </div>
+        <div class="panel-body">
+          <ul class="legend">
+            <li><span class="swatch win"></span>new clients you can win</li>
+            <li><span class="swatch churn"></span>clients churn takes</li>
+          </ul>
+          <div class="chart-wrap">
+            <svg id="ceiling" viewBox="0 0 720 260" role="img" aria-labelledby="ceil-t"></svg>
+            <div class="tip" id="ceil-tip"></div>
+          </div>
+          <p class="prose" style="margin-top:14px" id="ceil-t">
+            Every hour spent servicing a client is an hour not spent selling. Where the lines
+            cross, churn starts taking clients faster than you can replace them and the business
+            shrinks no matter how hard you work. <strong id="ceiling-say">—</strong>
+          </p>
+        </div>
+      </section>
+
+      <!-- --------------------------- checkpoints -->
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Checkpoints</h2>
+          <p class="panel-note">futures that reached $1M vs. futures that did not</p>
+        </div>
+        <div class="panel-body">
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr><th scope="col">Month</th><th scope="col">Winners had</th><th scope="col">Losers had</th><th scope="col">Your line</th></tr>
+              </thead>
+              <tbody id="checkpoints"></tbody>
+            </table>
+          </div>
+          <p class="prose" style="margin-top:14px">
+            These are live: they recompute from your assumptions, splitting the runs by whether
+            they finished above a million. <strong>Month 6 is the checkpoint that matters</strong> —
+            by then the two populations barely overlap, so you learn whether this is working after
+            six months of part-time effort rather than after two years.
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="colophon">
+    <p><strong>What this does not know.</strong> It treats the sale of the business as instantaneous
+    at your horizon; selling a small agency really takes 6–12 months, so the timing is optimistic
+    even where the magnitude is honest. It contains no model of your motivation across two years of
+    unglamorous outbound, no recession, no lawsuit, and no key contractor quitting in month ten.</p>
+    <p>Elasticities and conversion rates are judgement, not measurement. Run
+    <code>python3 run.py robust</code> in the repository to see the price recommendation reverse if
+    the elasticity guess is wrong — then measure your own with two price points over sixty days.</p>
+    <p>Full model, 63 tests and the written strategy live in the repo. This is a thinking tool.
+    It is not a forecast, and it is not financial advice.</p>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   Model — a faithful port of model/engine.py and montecarlo.py.
+   Kept structurally identical so the two can be diffed by eye.
+   ============================================================ */
+const WPM = 52/12;
+
+const BASE = {
+  goal:1000000, horizonMonths:24, hoursPerWeek:20, startingCapital:5000,
+  price:6000, setupFee:2500, deliveryCostPct:0.45,
+  touchesPerHour:12, replyRate:0.020, callRate:0.55, closeRate:0.20,
+  hoursPerCall:1.5, salesCycleMonths:1.0, monthlyChurn:0.055,
+  ownerHoursPerClient:6.0, selfManagedClients:5, opsCapacityClients:8,
+  opsCostMonth:4500, oversightFactor:0.20,
+  fixedCostsMonth:600, incomeTaxRate:0.30, capitalGainsRate:0.20,
+  exitMultiple:2.6, exitProbability:0.45,
+  concentrationFloor:0.45, concentrationFullAt:12,
+  operatorSigma:0.45, priceSigma:0.20, churnSigma:0.30,
+  deliverySigma:0.15, multipleSigma:0.25
+};
+
+const PRESETS = {
+  baseline: {},
+  // Craft first, delegate early, defend retention, modest move upmarket.
+  recommended: {
+    price:10000, closeRate:0.162, touchesPerHour:13.0, replyRate:0.024,
+    salesCycleMonths:1.3, hoursPerCall:1.94,
+    selfManagedClients:3, monthlyChurn:0.045, deliveryCostPct:0.42
+  },
+  long: {
+    price:10000, closeRate:0.162, touchesPerHour:13.0, replyRate:0.024,
+    salesCycleMonths:1.3, hoursPerCall:1.94,
+    selfManagedClients:3, monthlyChurn:0.045, deliveryCostPct:0.42,
+    horizonMonths:36
+  }
+};
+
+function mulberry32(a){
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function gauss(rng){
+  let u = 0, v = 0;
+  while (u === 0) u = rng();
+  while (v === 0) v = rng();
+  return Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v);
+}
+function lognormal(rng, sigma){
+  if (sigma <= 0) return 1;
+  return Math.exp(-0.5*sigma*sigma + sigma*gauss(rng));
+}
+function poisson(rng, lam){
+  if (lam <= 0) return 0;
+  if (lam > 30) return Math.max(0, Math.round(lam + Math.sqrt(lam)*gauss(rng)));
+  const target = Math.exp(-lam);
+  let k = 0, p = 1;
+  for(;;){ p *= rng(); if (p <= target) return k; k++; }
+}
+function binomial(rng, n, p){
+  if (n <= 0 || p <= 0) return 0;
+  if (p >= 1) return n;
+  let c = 0;
+  for (let i = 0; i < n; i++) if (rng() < p) c++;
+  return c;
+}
+const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+
+function concentrationFactor(clients, p){
+  if (clients <= 0) return 0;
+  if (clients >= p.concentrationFullAt) return 1;
+  const span = Math.max(1, p.concentrationFullAt - 1);
+  return p.concentrationFloor + (1 - p.concentrationFloor) * ((clients - 1) / span);
+}
+function hiresNeeded(clients, p){
+  return Math.ceil(Math.max(0, clients - p.selfManagedClients) / p.opsCapacityClients);
+}
+function ownerOpsHours(clients, hires, p){
+  const overflow = Math.max(0, clients - p.selfManagedClients);
+  const delegated = Math.min(overflow, hires * p.opsCapacityClients);
+  const direct = clients - delegated;
+  return direct * p.ownerHoursPerClient
+       + delegated * p.ownerHoursPerClient * p.oversightFactor;
+}
+/* Prospecting creates call obligations; you cannot spend the hour twice.
+   prospect + prospect*k = salesHours  =>  prospect = salesHours / (1+k) */
+function funnel(salesHours, p){
+  if (salesHours <= 0) return {touches:0, calls:0, expectedNew:0};
+  const k = p.touchesPerHour * p.replyRate * p.callRate * p.hoursPerCall;
+  const prospect = salesHours / (1 + k);
+  const touches = prospect * p.touchesPerHour;
+  const calls = touches * p.replyRate * p.callRate;
+  return {touches, calls, expectedNew: calls * p.closeRate};
+}
+
+function simulate(p, rng){
+  const hoursPerMonth = p.hoursPerWeek * WPM;
+  let clients = 0, hires = 0, cash = p.startingCapital, carry = 0;
+  const pretax = [], trace = [];
+  const lag = Math.max(0, Math.round(p.salesCycleMonths) - 1);
+  const arrivals = new Float64Array(p.horizonMonths + lag + 2);
+  let ruined = false;
+
+  for (let month = 1; month <= p.horizonMonths; month++){
+    const start = clients;
+
+    const need = hiresNeeded(start, p);
+    if (need > hires && cash >= (need - hires) * p.opsCostMonth * 2) hires = need;
+
+    const ops = ownerOpsHours(start, hires, p);
+    const sales = Math.max(0, hoursPerMonth - ops);
+    const f = funnel(sales, p);
+
+    arrivals[month + lag] += f.expectedNew;
+    const landing = arrivals[month];
+
+    const fresh = rng ? poisson(rng, landing) : landing;
+    const churned = rng ? binomial(rng, start, p.monthlyChurn) : start * p.monthlyChurn;
+    const retained = start - churned;
+    clients = retained + fresh;
+
+    const revenue = retained * p.price + fresh * (p.price + p.setupFee);
+    const profit = revenue - revenue*p.deliveryCostPct - hires*p.opsCostMonth - p.fixedCostsMonth;
+
+    let tax = 0;
+    if (profit > 0){
+      const offset = Math.min(carry, profit);
+      carry -= offset;
+      tax = (profit - offset) * p.incomeTaxRate;
+    } else {
+      carry += -profit;
+    }
+    cash += profit - tax;
+    pretax.push(profit);
+    trace.push({month, clients, cash});
+
+    if (cash < 0){ ruined = true; break; }
+  }
+
+  let sde = 0, exitValue = 0, proceeds = 0;
+  if (!ruined){
+    const tail = pretax.slice(-12);
+    if (tail.length) sde = tail.reduce((a,b)=>a+b, 0) * (12 / tail.length);
+    exitValue = Math.max(0, sde) * p.exitMultiple * concentrationFactor(clients, p);
+    if (rng) proceeds = (rng() < p.exitProbability) ? exitValue * (1 - p.capitalGainsRate) : 0;
+    else proceeds = exitValue * p.exitProbability * (1 - p.capitalGainsRate);
+  }
+  return {cash, wealth: cash + proceeds, clients, sde, ruined, trace};
+}
+
+/* One latent operator factor ties the funnel together: a person who writes good
+   cold email also runs good calls. Independent draws would cancel and flatten
+   both tails, which is the flaw that makes most business models useless. */
+function draw(p, rng){
+  const operator = lognormal(rng, p.operatorSigma);
+  const stage = Math.cbrt(operator);
+  const priceMult = Math.sqrt(operator) * lognormal(rng, p.priceSigma);
+  const churnMult = lognormal(rng, p.churnSigma) / Math.sqrt(operator);
+  return Object.assign({}, p, {
+    replyRate: clamp(p.replyRate*stage, 0.0005, 0.5),
+    callRate:  clamp(p.callRate*stage, 0.02, 0.95),
+    closeRate: clamp(p.closeRate*stage, 0.01, 0.85),
+    price: Math.max(500, p.price*priceMult),
+    monthlyChurn: clamp(p.monthlyChurn*churnMult, 0.005, 0.40),
+    deliveryCostPct: clamp(p.deliveryCostPct*lognormal(rng, p.deliverySigma), 0.05, 0.90),
+    exitMultiple: Math.max(0, p.exitMultiple*lognormal(rng, p.multipleSigma))
+  });
+}
+
+function percentile(sorted, q){
+  if (!sorted.length) return 0;
+  if (sorted.length === 1) return sorted[0];
+  const pos = (q/100) * (sorted.length - 1);
+  const lo = Math.floor(pos), hi = Math.ceil(pos);
+  return lo === hi ? sorted[lo] : sorted[lo] + (sorted[hi]-sorted[lo])*(pos-lo);
+}
+
+const CHECK_MONTHS = [3, 6, 9, 12, 18, 24];
+
+function monteCarlo(p, trials, seed){
+  const rng = mulberry32(seed);
+  const wealth = [], clients = [];
+  let hits = 0, cashHits = 0;
+  const win = {}, lose = {};
+  CHECK_MONTHS.forEach(m => { win[m] = []; lose[m] = []; });
+
+  for (let i = 0; i < trials; i++){
+    const r = simulate(draw(p, rng), rng);
+    wealth.push(r.wealth);
+    clients.push(r.clients);
+    const won = r.wealth >= p.goal;
+    if (won) hits++;
+    if (r.cash >= p.goal) cashHits++;
+    const bucket = won ? win : lose;
+    for (const s of r.trace) if (bucket[s.month]) bucket[s.month].push(s.clients);
+  }
+  wealth.sort((a,b)=>a-b);
+  clients.sort((a,b)=>a-b);
+  const med = o => {
+    const out = {};
+    for (const m of CHECK_MONTHS){
+      const arr = o[m].slice().sort((a,b)=>a-b);
+      out[m] = arr.length ? percentile(arr, 50) : null;
+    }
+    return out;
+  };
+  return {
+    trials, wealth, pGoal: hits/trials, pCash: cashHits/trials,
+    p10: percentile(wealth,10), p50: percentile(wealth,50), p90: percentile(wealth,90),
+    medClients: percentile(clients,50), winners: med(win), losers: med(lose)
+  };
+}
+
+/* Who does this plan secretly assume you are? Three modest nudges multiply
+   into an heroic claim, and the multiplication is invisible unless computed. */
+function normalCdf(z){
+  const t = 1/(1 + 0.2316419*Math.abs(z));
+  const d = 0.3989423*Math.exp(-z*z/2);
+  const prob = d*t*(0.3193815 + t*(-0.3565638 + t*(1.781478 + t*(-1.821256 + t*1.330274))));
+  return z > 0 ? 1 - prob : prob;
+}
+function impliedOperator(p){
+  const ratio = (p.replyRate/BASE.replyRate)*(p.callRate/BASE.callRate)*(p.closeRate/BASE.closeRate);
+  if (ratio <= 0) return 0;
+  const s = BASE.operatorSigma;
+  return normalCdf((Math.log(ratio) + 0.5*s*s)/s);
+}
+
+function steadyState(p, n){
+  const hires = hiresNeeded(n, p);
+  const ops = ownerOpsHours(n, hires, p);
+  const sales = Math.max(0, p.hoursPerWeek*WPM - ops);
+  return {
+    clients:n, ops, sales,
+    wins: funnel(sales, p).expectedNew,
+    losses: n * p.monthlyChurn
+  };
+}
+
+/* ============================================================
+   Controls
+   ============================================================ */
+const SLIDERS = [
+  {key:"price", label:"Monthly retainer", min:3000, max:25000, step:500,
+   fmt:v=>"$"+v.toLocaleString(), hint:"Below $6,000 the business you would need is bigger than the one you can staff."},
+  {key:"hoursPerWeek", label:"Your hours / week", min:5, max:40, step:1,
+   fmt:v=>v+" h", hint:null},
+  {key:"replyRate", label:"Positive reply rate", min:0.004, max:0.06, step:0.001,
+   fmt:v=>(v*100).toFixed(1)+"%", hint:"Positive replies only. Counting unsubscribes is how plans lie."},
+  {key:"closeRate", label:"Call → client", min:0.04, max:0.45, step:0.01,
+   fmt:v=>(v*100).toFixed(0)+"%", hint:null},
+  {key:"touchesPerHour", label:"Touches / hour", min:4, max:30, step:1,
+   fmt:v=>String(v), hint:"Tooling and list hygiene. A purchase, not a talent."},
+  {key:"monthlyChurn", label:"Monthly churn", min:0.01, max:0.15, step:0.005,
+   fmt:v=>(v*100).toFixed(1)+"%", hint:null},
+  {key:"selfManagedClients", label:"Clients before hiring", min:1, max:12, step:1,
+   fmt:v=>String(v), hint:"The one lever that runs backwards: lower is better."},
+  {key:"deliveryCostPct", label:"Delivery cost", min:0.20, max:0.70, step:0.01,
+   fmt:v=>(v*100).toFixed(0)+"%", hint:null},
+  {key:"exitProbability", label:"Odds you find a buyer", min:0, max:1, step:0.05,
+   fmt:v=>(v*100).toFixed(0)+"%", hint:"Two-thirds of your odds live here, not in banked profit."},
+  {key:"horizonMonths", label:"Deadline", min:12, max:48, step:1,
+   fmt:v=>v+" months", hint:"The cheapest variable in the whole model."}
+];
+
+let P = Object.assign({}, BASE);
+const $ = id => document.getElementById(id);
+const money = v => v >= 1e6 ? "$"+(v/1e6).toFixed(2)+"M"
+                 : v >= 1e3 ? "$"+Math.round(v/1e3)+"k" : "$"+Math.round(v);
+
+function buildSliders(){
+  const host = $("sliders");
+  host.innerHTML = "";
+  for (const s of SLIDERS){
+    const row = document.createElement("div");
+    row.className = "ctrl";
+    row.innerHTML =
+      '<div class="ctrl-top">' +
+        '<label for="s-'+s.key+'">'+s.label+'</label>' +
+        '<output id="o-'+s.key+'" for="s-'+s.key+'"></output>' +
+      '</div>' +
+      '<input type="range" id="s-'+s.key+'" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'">' +
+      (s.hint ? '<p class="hint">'+s.hint+'</p>' : '');
+    host.appendChild(row);
+    const input = row.querySelector("input");
+    input.value = P[s.key];
+    input.addEventListener("input", () => {
+      P[s.key] = parseFloat(input.value);
+      $("o-"+s.key).textContent = s.fmt(P[s.key]);
+      document.querySelectorAll("[data-preset]").forEach(b => b.setAttribute("aria-pressed","false"));
+      schedule();
+    });
+    $("o-"+s.key).textContent = s.fmt(P[s.key]);
+  }
+}
+function applyPreset(name){
+  P = Object.assign({}, BASE, PRESETS[name]);
+  for (const s of SLIDERS){
+    const el = $("s-"+s.key);
+    if (el){ el.value = P[s.key]; $("o-"+s.key).textContent = s.fmt(P[s.key]); }
+  }
+  document.querySelectorAll("[data-preset]").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.preset === name)));
+  run();
+}
+
+/* ============================================================
+   Charts
+   ============================================================ */
+const BIN = 100000, NBINS = 30;  // $0–$3M plus one overflow bin
+
+function drawHist(mc){
+  const svg = $("hist");
+  const W = 720, H = 300, L = 8, R = 8, T = 26, B = 34;
+  const bins = new Array(NBINS + 1).fill(0);
+  for (const w of mc.wealth) bins[Math.min(NBINS, Math.max(0, Math.floor(w/BIN)))]++;
+  const peak = Math.max(...bins, 1);
+  const bw = (W - L - R) / (NBINS + 1);
+  const x = i => L + i*bw;
+  const y = c => T + (H - T - B) * (1 - c/peak);
+  const goalX = L + (1000000/BIN) * bw;
+
+  let s = '<line class="ax-line" x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'"/>';
+  for (let i = 0; i <= NBINS; i++){
+    if (!bins[i]) continue;
+    const h = (H - B) - y(bins[i]);
+    const lo = i*BIN;
+    const label = i === NBINS ? "over $3M" : money(lo)+"–"+money(lo+BIN);
+    s += '<rect class="bar'+(lo >= 1000000 ? ' hit' : '')+'" x="'+(x(i)+1).toFixed(1)+
+         '" y="'+y(bins[i]).toFixed(1)+'" width="'+Math.max(1,bw-2).toFixed(1)+
+         '" height="'+Math.max(0.5,h).toFixed(1)+'" rx="1.5" data-label="'+label+
+         '" data-n="'+bins[i]+'" data-pct="'+(100*bins[i]/mc.trials).toFixed(1)+'"/>';
+  }
+  s += '<line class="goal-line" x1="'+goalX.toFixed(1)+'" y1="'+(T-10)+'" x2="'+goalX.toFixed(1)+'" y2="'+(H-B)+'"/>';
+  s += '<text class="goal-text" x="'+(goalX-5).toFixed(1)+'" y="'+(T-14)+'" text-anchor="end">$1M</text>';
+  s += '<text class="region-text" x="'+(goalX+6).toFixed(1)+'" y="'+(T-14)+'">'+
+       (mc.pGoal*100).toFixed(0)+'% land here →</text>';
+  for (let i = 0; i < NBINS; i += 5){
+    s += '<text class="ax-text" x="'+x(i).toFixed(1)+'" y="'+(H-B+16)+'" text-anchor="middle">'+
+         (i === 0 ? "$0" : "$"+(i*BIN/1e6).toFixed(1)+"M")+'</text>';
+  }
+  s += '<text class="ax-text" x="'+(W-R)+'" y="'+(H-B+16)+'" text-anchor="end">$3M+</text>';
+  svg.innerHTML = s;
+
+  const tip = $("hist-tip");
+  svg.querySelectorAll(".bar").forEach(bar => {
+    bar.addEventListener("mouseenter", e => {
+      const r = e.target.getBoundingClientRect(), w = svg.parentElement.getBoundingClientRect();
+      tip.innerHTML = e.target.dataset.label + "<br>" + e.target.dataset.pct + "% of futures";
+      tip.style.left = (r.left - w.left + r.width/2) + "px";
+      tip.style.top  = (r.top - w.top - 8) + "px";
+      tip.classList.add("on");
+    });
+    bar.addEventListener("mouseleave", () => tip.classList.remove("on"));
+  });
+}
+
+function drawCeiling(){
+  const svg = $("ceiling");
+  const W = 720, H = 260, L = 42, R = 96, T = 18, B = 40;
+  const pts = [];
+  for (let n = 2; n <= 34; n++) pts.push(steadyState(P, n));
+  const maxY = Math.max(...pts.map(p => Math.max(p.wins, p.losses)), 0.5) * 1.12;
+  const x = n => L + (W-L-R) * (n-2)/32;
+  const y = v => T + (H-T-B) * (1 - v/maxY);
+
+  let cross = null;
+  for (let i = 1; i < pts.length; i++){
+    if (pts[i-1].wins >= pts[i-1].losses && pts[i].wins < pts[i].losses){ cross = pts[i].clients; break; }
+  }
+
+  let s = "";
+  for (let g = 0; g <= 4; g++){
+    const v = maxY*g/4;
+    s += '<line class="grid-line" x1="'+L+'" y1="'+y(v).toFixed(1)+'" x2="'+(W-R)+'" y2="'+y(v).toFixed(1)+'"/>';
+    s += '<text class="ax-text" x="'+(L-8)+'" y="'+(y(v)+3.5).toFixed(1)+'" text-anchor="end">'+v.toFixed(1)+'</text>';
+  }
+  s += '<line class="ax-line" x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'"/>';
+  for (let n = 5; n <= 34; n += 5){
+    s += '<text class="ax-text" x="'+x(n).toFixed(1)+'" y="'+(H-B+16)+'" text-anchor="middle">'+n+'</text>';
+  }
+  s += '<text class="ax-text" x="'+((L+W-R)/2)+'" y="'+(H-B+32)+'" text-anchor="middle">clients under management</text>';
+
+  if (cross !== null){
+    s += '<line class="cross-line" x1="'+x(cross).toFixed(1)+'" y1="'+T+'" x2="'+x(cross).toFixed(1)+'" y2="'+(H-B)+'"/>';
+    s += '<text class="ax-text" x="'+(x(cross)+5).toFixed(1)+'" y="'+(T+11)+'">ceiling · '+cross+'</text>';
+  }
+  const path = (key, cls) => {
+    let d = "";
+    pts.forEach((p,i) => { d += (i ? "L" : "M") + x(p.clients).toFixed(1) + " " + y(p[key]).toFixed(1) + " "; });
+    return '<path class="'+cls+'" d="'+d.trim()+'"/>';
+  };
+  s += path("losses","ln-churn") + path("wins","ln-win");
+  const last = pts[pts.length-1];
+  s += '<circle class="dot-win" cx="'+x(last.clients).toFixed(1)+'" cy="'+y(last.wins).toFixed(1)+'" r="4"/>';
+  s += '<circle class="dot-churn" cx="'+x(last.clients).toFixed(1)+'" cy="'+y(last.losses).toFixed(1)+'" r="4"/>';
+  s += '<text class="lbl-win" x="'+(x(last.clients)+9).toFixed(1)+'" y="'+(y(last.wins)+4).toFixed(1)+'">you win</text>';
+  s += '<text class="lbl-churn" x="'+(x(last.clients)+9).toFixed(1)+'" y="'+(y(last.losses)+4).toFixed(1)+'">churn takes</text>';
+  svg.innerHTML = s;
+
+  $("ceiling-say").textContent = cross === null
+    ? "At these settings the lines never cross inside 34 clients — hours are not your binding constraint here."
+    : "At your settings that happens at " + cross + " clients.";
+}
+
+/* ============================================================
+   Render
+   ============================================================ */
+function run(){
+  const mc = monteCarlo(P, 4000, 20260914);
+
+  $("pgoal").textContent = (mc.pGoal*100).toFixed(0) + "%";
+  $("verdict-sub").textContent = "across 4,000 futures · " +
+    (mc.pCash*100).toFixed(0) + "% get there on banked profit alone";
+  $("q-p10").textContent = money(mc.p10);
+  $("q-p50").textContent = money(mc.p50);
+  $("q-p90").textContent = money(mc.p90);
+  $("q-clients").textContent = Math.round(mc.medClients);
+
+  const pct = impliedOperator(P);
+  const box = $("audit"), icon = $("audit-icon"), text = $("audit-text");
+  const beat = (pct*100).toFixed(0);
+  if (pct >= 0.85){
+    box.classList.add("flag");
+    icon.textContent = "STACKED";
+    text.innerHTML = "This plan quietly assumes you are a <strong>top " +
+      (100-pct*100).toFixed(0) + "% operator</strong> — better than " + beat +
+      "% of people running this funnel — and then adds luck on top of that. " +
+      "Three modest nudges multiply into an heroic claim. Argue for it out loud, or dial it back.";
+  } else {
+    box.classList.remove("flag");
+    icon.textContent = "FAIR";
+    text.innerHTML = "This plan assumes you out-perform <strong>" + beat +
+      "% of operators</strong> on the funnel. That is a claim you can defend. " +
+      "Push the reply and close rates much further and this line will tell you when you have stopped being honest.";
+  }
+
+  const tb = $("checkpoints");
+  tb.innerHTML = "";
+  const horizon = P.horizonMonths;
+  for (const m of CHECK_MONTHS){
+    if (m > horizon) continue;
+    const w = mc.winners[m], l = mc.losers[m];
+    if (w === null || l === null) continue;
+    const line = Math.round((w + l)/2);
+    tb.insertAdjacentHTML("beforeend",
+      "<tr><td>Month " + m + "</td>" +
+      '<td class="n hilite">' + w.toFixed(0) + " clients</td>" +
+      '<td class="n">' + l.toFixed(0) + " clients</td>" +
+      '<td class="n"><strong>' + line + "</strong></td></tr>");
+  }
+
+  drawHist(mc);
+  drawCeiling();
+
+  try { localStorage.setItem("mdo.params", JSON.stringify(P)); } catch(e){}
+}
+
+let timer = null;
+function schedule(){ clearTimeout(timer); timer = setTimeout(run, 90); }
+
+document.querySelectorAll("[data-preset]").forEach(b =>
+  b.addEventListener("click", () => applyPreset(b.dataset.preset)));
+
+try {
+  const saved = localStorage.getItem("mdo.params");
+  if (saved){
+    const parsed = JSON.parse(saved);
+    for (const s of SLIDERS) if (typeof parsed[s.key] === "number") P[s.key] = parsed[s.key];
+    document.querySelectorAll("[data-preset]").forEach(b => b.setAttribute("aria-pressed","false"));
+  }
+} catch(e){}
+
+buildSliders();
+run();
+</script>
