@@ -56,7 +56,7 @@ repository and do not get there. That is the honest shape of the thing.
 
 Not certainty. Three narrower and more useful things:
 
-- **The arithmetic is tested.** 63 tests, including a month computed by hand
+- **The arithmetic is tested.** 70 tests, including a month computed by hand
   and checked against the code. Writing that test caught a rounding error in my
   own hand arithmetic on the first run.
 - **Every assumption is in one file.** `model/params.py`. If a number there is
@@ -78,6 +78,7 @@ python3 run.py levers    # which assumption matters most
 python3 run.py robust    # where my own advice flips
 python3 run.py ceiling   # how many clients you can actually hold
 python3 run.py target    # what a $1M business has to look like
+python3 run.py buyers    # who can afford your retainer
 
 python3 -m unittest discover -s tests -v
 ```
@@ -86,6 +87,7 @@ python3 -m unittest discover -s tests -v
 
 | | |
 |---|---|
+| `strategy/05-what-you-sell.md` | **The actual offer** — what it is, who buys it, the first email |
 | `strategy/00-the-arithmetic.md` | What $1M requires, before any strategy |
 | `strategy/01-the-plan.md` | What to do, starting Monday |
 | `strategy/02-failure-modes.md` | How this dies, and the counter to each |

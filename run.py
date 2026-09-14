@@ -20,6 +20,7 @@ import sys
 
 from model import Params, monte_carlo, simulate, tornado
 from model.montecarlo import percentile
+from model.offer import min_acv, shortlist
 from model.scenarios import (
     audit,
     compare,
@@ -194,8 +195,26 @@ def plans() -> None:
     print("  (grind_harder needs 25h/wk, which is above the 20h you said you have.)")
 
 
+def buyers() -> None:
+    head("WHO CAN AFFORD YOU -- the filter that decides your whole list")
+    print(f"\n{'market':<36} {'deal size':>10} {'per meeting':>12} {'their ROI':>10}   verdict")
+    for r in shortlist():
+        print(
+            f"{r['name']:<36} {money(r['acv']):>10} {money(r['meeting_value']):>12} "
+            f"{r['roi']:>9.1f}x   {r['verdict']}"
+        )
+    print()
+    for fee, m in ((6_000, 10), (10_000, 10), (10_000, 8), (15_000, 12)):
+        print(f"  ${fee:>6,}/mo for {m:>2} meetings needs deal sizes above {money(min_acv(fee, m)):>9}")
+    print(
+        "\nThe market everyone defaults to -- Series A SaaS -- is one of the harder\n"
+        "ones at this price. Budget lives in unglamorous, high-ticket services."
+    )
+
+
 COMMANDS = {
     "baseline": baseline,
+    "buyers": buyers,
     "odds": odds,
     "levers": levers,
     "price": price,

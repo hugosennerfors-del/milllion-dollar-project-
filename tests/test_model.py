@@ -29,6 +29,7 @@ from model.engine import (  # noqa: E402
 )
 from model.montecarlo import _lognormal, draw, monte_carlo, percentile  # noqa: E402
 from model.params import WEEKS_PER_MONTH, Params  # noqa: E402
+from model.offer import Buyer, min_acv, qualifies, roi, shortlist  # noqa: E402
 from model.sensitivity import tornado  # noqa: E402
 
 
@@ -523,3 +524,51 @@ class TestSensitivity(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestOfferEconomics(unittest.TestCase):
+    """Who can afford you is arithmetic, not taste."""
+
+    def test_meeting_value_chains_the_rates(self):
+        b = Buyer("x", 100_000, 0.5, 0.2)
+        self.assertAlmostEqual(b.meeting_value, 10_000.0, places=9)
+
+    def test_roi_is_pipeline_over_fee(self):
+        b = Buyer("x", 100_000, 0.5, 0.2)          # $10k per meeting
+        self.assertAlmostEqual(roi(b, 10_000, 10), 10.0, places=9)
+        self.assertAlmostEqual(roi(b, 20_000, 10), 5.0, places=9)
+
+    def test_min_acv_round_trips_through_roi(self):
+        """The inverse must actually invert -- the property that matters.
+
+        A deal size at exactly the threshold has to produce exactly the target
+        ROI, or the list-building filter is quietly wrong.
+        """
+        for fee, meetings, target in ((10_000, 10, 5.0), (6_000, 8, 3.0), (15_000, 12, 4.0)):
+            acv = min_acv(fee, meetings, target)
+            b = Buyer("threshold", acv)
+            self.assertAlmostEqual(roi(b, fee, meetings), target, places=6)
+
+    def test_the_forty_thousand_dollar_rule(self):
+        """The single number that sorts the market. Guard it."""
+        self.assertAlmostEqual(min_acv(10_000, 10, 5.0), 40_000.0, places=6)
+
+    def test_qualifies_tracks_the_threshold(self):
+        cheap = Buyer("small", 18_000, 0.45, 0.20)
+        rich = Buyer("large", 150_000, 0.40, 0.18)
+        self.assertFalse(qualifies(cheap, 10_000, 10))
+        self.assertTrue(qualifies(rich, 10_000, 10))
+
+    def test_shortlist_is_ranked_and_labelled(self):
+        rows = shortlist()
+        self.assertEqual([r["roi"] for r in rows], sorted((r["roi"] for r in rows), reverse=True))
+        self.assertTrue(any(r["verdict"] == "easy yes" for r in rows))
+        self.assertTrue(any(r["verdict"] == "no" for r in rows))
+
+    def test_rejects_impossible_buyers(self):
+        with self.assertRaises(ValueError):
+            Buyer("bad", 0)
+        with self.assertRaises(ValueError):
+            Buyer("bad", 50_000, meeting_to_opp=1.4)
+        with self.assertRaises(ValueError):
+            roi(Buyer("ok", 50_000), 0, 10)
