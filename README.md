@@ -103,3 +103,12 @@ wrong. Real businesses fail for reasons no model contains: you get sick, you
 lose interest, a client sues you, your co-founder leaves, the market moves.
 
 Use it to think with. Do not use it as a forecast.
+
+---
+
+## Also in this repository
+
+`liftoff/` — a standalone gym tracker that scores every set you log and ranks
+it from Wood to Olympian. Unrelated to the financial model above; it shares
+the same habit of putting every judgement call in one file and testing the
+arithmetic. Open `liftoff/index.html`, or see `liftoff/README.md`.

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0F14">
+<meta name="description" content="A gym tracker that ranks every set you log, from Wood to Olympian.">
+<title>Liftoff</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <h1 id="title">Liftoff</h1>
+    <div id="topbar-actions" class="row"></div>
+  </header>
+  <main id="view" class="view"></main>
+</div>
+
+<div id="rest" class="rest hide"></div>
+
+<nav class="tabbar" id="tabbar">
+  <button data-tab="train" class="on">
+    <svg viewBox="0 0 24 24"><path d="M6.5 6.5v11M3.5 9v5M17.5 6.5v11M20.5 9v5M6.5 12h11"/></svg>
+    Train
+  </button>
+  <button data-tab="ranks">
+    <svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>
+    Ranks
+  </button>
+  <button data-tab="history">
+    <svg viewBox="0 0 24 24"><path d="M12 7v5l3.5 2"/><circle cx="12" cy="12" r="8.5"/></svg>
+    History
+  </button>
+  <button data-tab="profile">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+    Profile
+  </button>
+</nav>
+
+<div id="sheet-host"></div>
+<div id="toast-host"></div>
+
+<script src="data.js"></script>
+<script src="rank.js"></script>
+<script src="store.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
